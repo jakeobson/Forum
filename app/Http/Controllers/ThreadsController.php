@@ -8,7 +8,6 @@ use App\Channel;
 use App\Filters\ThreadFilters;
 use App\Trending;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 
 
 class ThreadsController extends Controller
@@ -24,12 +23,9 @@ class ThreadsController extends Controller
 
         $threads = Thread::latest()->filter($filters);
 
-
-
         if ($channel->exists) {
             $threads->where('channel_id', $channel->id);
         }
-
 
         $threads = $threads->paginate(25);
 
