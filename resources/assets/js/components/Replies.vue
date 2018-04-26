@@ -42,7 +42,7 @@
                 if (!page) {
                     let query = location.search.match(/page=(\d+)/);
 
-                    page = query ? query[1]: 1;
+                    page = query ? query[1] : 1;
                 }
 
                 return location.pathname + '/replies?page=' + page;
@@ -50,6 +50,7 @@
             refresh({data}) {
                 this.dataSet = data;
                 this.items = data.data;
+                window.scrollTo(0, 0);
             }
         }
     }

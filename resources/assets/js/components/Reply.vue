@@ -1,5 +1,5 @@
 <template>
-    <div class="card" :id="'reply-'+id">
+    <div class="card" :id="'reply-'+id" :class="isBest ? 'bg-success': 'bg-default'">
         <div class="card-header">
             <a :href="'/profiles/'+data.user.name" v-text="data.user.name"></a>
             said: <span v-text="ago"></span>
@@ -15,21 +15,28 @@
         <div class="card-body">
 
             <div v-if="editing">
-                <div class="form-group">
-                    <textarea class="form-control" v-model="body"></textarea>
-                </div>
-                <button class="btn btn-xs btn-primary" @click="update">Submit</button>
-                <button class="btn btn-xs btn-link" @click="editing = false">Cancel</button>
+                <form @submit.prevent="update">
+                    <div class="form-group">
+                        <textarea class="form-control" v-model="body" required></textarea>
+                    </div>
+                    <button class="btn btn-xs btn-primary">Submit</button>
+                    <button class="btn btn-xs btn-link" @click="editing = false" type="button">Cancel</button>
+                </form>
             </div>
 
-            <div v-else v-text="body"></div>
+            <div v-else v-html="body"></div>
         </div>
-        <div class="card-footer" v-if="canUpdate">
-            <!--@can('update', $reply)-->
-            <button class="btn btn-xs" @click="editing = true">Edit</button>
+        <div class="card-footer">
+            <div v-if="authorize('updateReply', reply)">
+                <button class="btn btn-xs" @click="editing = true">Edit</button>
 
-            <button class="btn btn-warning btn-xs" @click="destroy">
-                Delete
+                <button class="btn btn-warning btn-xs" @click="destroy">
+                    Delete
+                </button>
+            </div>
+
+            <button class="btn-default btn-xs" @click="markBestReply" v-show="!isBest">
+                Best reply
             </button>
             <!--@endcan-->
         </div>
@@ -49,35 +56,44 @@
             return {
                 id: this.data.id,
                 editing: false,
-                body: this.data.body
+                body: this.data.body,
+                isBest: this.data.isBest,
+                reply: this.data
             }
         },
         computed: {
-            signedIn() {
-                return window.App.signedIn;
-            },
-            canUpdate() {
-                return this.authorize(user => this.data.user_id == user.id);
-                // return this.data.user_id == window.App.user.id;
-            },
             ago() {
                 return moment(this.data.created_at).fromNow();
             }
+        },
+        created() {
+            window.events.$on('best-reply-selected', id => {
+                this.isBest = (id === this.id);
+            });
         },
         methods: {
             update() {
                 axios.patch('/replies/' + this.id, {
                     body: this.body
+                }).catch(error => {
+                    flash(error.response.data, 'danger');
                 });
 
                 this.editing = false;
 
                 flash('Updated a reply');
+
             },
             destroy() {
                 axios.delete('/replies/' + this.id);
 
                 this.$emit('deleted', this.id);
+            },
+            markBestReply() {
+
+                axios.post('/replies/' + this.id + '/best');
+
+                window.events.$emit('best-reply-selected', this.id);
             }
         }
     }

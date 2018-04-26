@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Reply extends Model
@@ -11,10 +12,23 @@ class Reply extends Model
 
     protected $guarded = [];
 
-
     protected $with = ['user', 'favorites'];
 
-    protected $appends = ['favoritesCount', 'isFavorited'];
+    protected $appends = ['favoritesCount', 'isFavorited', 'isBest'];
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($reply) {
+            $reply->thread->increment('replies_count');
+        });
+
+        static::deleted(function ($reply) {
+            $reply->thread->decrement('replies_count');
+        });
+    }
 
     public function favorites()
     {
@@ -35,4 +49,31 @@ class Reply extends Model
     {
         return $this->thread->path() . '#reply-' . $this->id;
     }
+
+    public function wasJustPublished()
+    {
+        return $this->created_at->gt(Carbon::now()->subMinute());
+    }
+
+    public function mentionedUsers()
+    {
+        preg_match_all('/\@([\w\-]+)/', $this->body, $matches);
+
+        return $matches[1];
+    }
+
+    public function getBodyAttribute($body)
+    {
+        return preg_replace('/\@([\w\-]+)/', '<a href="/profiles/$1" target="_blank">$0</a>', $body);
+    }
+
+    public function isBest()
+    {
+        return $this->thread->best_reply_id == $this->id;
+    }
+
+    public function getIsBestAttribute(){
+        return $this->isBest();
+    }
+
 }

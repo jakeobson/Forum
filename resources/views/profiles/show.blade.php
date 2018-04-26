@@ -9,6 +9,15 @@
                     <div class="card-header">
                         <h3>{{ $profileUser->name }} profile</h3>
                         <small>Since: {{ $profileUser->created_at->diffForHumans() }}</small>
+
+                        {{--@can('update', $profileUser)--}}
+                            <br/>
+
+                            <avatar-form :user="{{ $profileUser }}"></avatar-form>
+
+                        {{--@endcan--}}
+
+
                     </div>
 
                     <div class="card-body">

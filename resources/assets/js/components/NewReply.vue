@@ -9,7 +9,7 @@
 
             <!--<form method="POST" action="/threads/{{ $thread->channel->slug }}/{{ $thread->id }}/replies">-->
             <div class="form-group">
-                <textarea name="body" class="form-control" required v-model="body"></textarea>
+                <textarea name="body" id="body" class="form-control" required v-model="body"></textarea>
             </div>
             <button type="submit" class="btn btn-default" @click="addReply">Add reply</button>
         </div>
@@ -24,16 +24,27 @@
 
 
 <script>
+    import 'jquery.caret';
+    import 'at.js';
+
     export default {
         data() {
             return {
                 body: ''
             }
         },
-        computed: {
-            signedIn() {
-                return window.App.signedIn;
-            }
+        mounted() {
+            $('#body').atwho({
+                at: '@',
+                delay: 500,
+                callbacks: {
+                    remoteFilter: function (query, callback) {
+                        $.getJSON('/api/users', {name: query}, function (names) {
+                            callback(names);
+                        });
+                    }
+                }
+            });
         },
         signedIn() {
             return window.App.signedIn;
@@ -45,6 +56,9 @@
         methods: {
             addReply() {
                 axios.post(location.pathname + '/replies', {body: this.body})
+                    .catch(error => {
+                        flash(error.response.data, 'danger');
+                    })
                     .then(({data}) => {
                         this.body = '';
 

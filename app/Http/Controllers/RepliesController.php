@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreatePostRequest;
 use App\Reply;
+use App\Rules\SpamFree;
 use App\Thread;
-use Illuminate\Http\Request;
+
 
 class RepliesController extends Controller
 {
@@ -18,27 +20,14 @@ class RepliesController extends Controller
         return $thread->replies()->paginate(10);
     }
 
-    public function store($channelId, Thread $thread)
+    public function store($channelId, Thread $thread, CreatePostRequest $form)
     {
-        $reply = $thread->replies()->create([
-            'body' => request('body'),
-            'user_id' => auth()->id()
-        ]);
-
-        if (request()->expectsJson()) {
-            return $reply->load('user');
-        }
-
-        return back()->with('flash', 'Your reply has been posted');
+        return $form->persist($thread);
     }
 
     public function destroy(Reply $reply)
     {
         $this->authorize('update', $reply);
-
-//        if($reply->user_id != auth()->id){
-//            return response([], 403);
-//        }
 
         $reply->delete();
 
@@ -46,12 +35,13 @@ class RepliesController extends Controller
             return response(['status' => 'Reply deleted']);
         }
 
-
         return back()->with('flash', 'Reply has been deleted');
     }
 
     public function update(Reply $reply)
     {
+        $this->validate(request(), ['body' => ['required', new SpamFree]]);
+
         $this->authorize('update', $reply);
 
         $reply->update(['body' => request('body')]);

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Dotenv\Validator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,12 +17,14 @@ class AppServiceProvider extends ServiceProvider
 //        \View::share('channels', \App\Channel::all());
 
         \View::composer('*', function ($view) {
-            $channels = \Cache::rememberForever('channel', function () {
+            $channels = \Cache::remember('channel', 5, function () {
                 return \App\Channel::all();
             });
             $view->with('channels', $channels);
 //            $view->with('channels', \App\Channel::all());
         });
+
+//        Validator::extend('spamfree', 'App\Rules\SpamFree@passes');
     }
 
     /**

@@ -7,15 +7,22 @@
 window.Vue = require('vue');
 
 
-Vue.prototype.authorize = function (handler) {
 
-    let user = window.App.user;
+let authorizations = require('./authorizations');
 
-    if (!user) return false;
 
-    return handler(user);
+Vue.prototype.authorize = function (...params) {
 
-}
+    if (!window.App.signedIn) return false;
+
+    if(typeof params[0] === 'string'){
+        return authorizations[params[0]](params[1]);
+    }
+
+    return params[0](window.App.user);
+};
+
+Vue.prototype.signedIn = window.App.signedIn;
 
 require('./bootstrap');
 
@@ -29,6 +36,8 @@ require('./bootstrap');
 Vue.component('flash-component', require('./components/Flash.vue'));
 Vue.component('thread-view', require('./pages/Thread.vue'));
 Vue.component('paginator', require('./components/Paginator.vue'));
+Vue.component('user-notifications', require('./components/UserNotifications.vue'));
+Vue.component('avatar-form', require('./components/AvatarForm.vue'));
 
 
 const app = new Vue({

@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('header')
+    <link href="{{ asset('css/vendor/jquery.atwho.css') }}" rel="stylesheet">
+@endsection
+
 @section('content')
     <thread-view :initial-replies-count="{{ $thread->replies_count }}" inline-template>
         <div class="container">
@@ -8,16 +12,17 @@
 
                     <div class="card">
                         <div class="card-header">
+
                             {{ $thread->title.' by '.$thread->user->name }}
+
+                            <img src="{{ $thread->user->avatar }}" width="30" height="30"/>
+
                         </div>
 
                         <div class="card-body">
                             {{ $thread->body }}
                         </div>
                     </div>
-
-
-                    {{--//reply form--}}
 
                     <hr/>
 
@@ -35,13 +40,20 @@
                                         v-text="repliesCount"></span> {{ str_plural('comment', $thread->replies_count) }}
                             </p>
 
+
                             @can ('update', $thread)
                                 <form action="{{ $thread->path() }}" method="POST">
                                     @csrf
                                     {{ method_field('DELETE') }}
                                     <button type="submit" class="btn btn-danger">Delete Thread</button>
                                 </form>
+
+
                             @endcan
+
+
+                            <subscribe-button
+                                    :active="{{ $thread->isSubscribedTo? 'true': 'false' }}"></subscribe-button>
                         </div>
                     </div>
                 </div>
