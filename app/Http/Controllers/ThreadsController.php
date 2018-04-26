@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Redis;
 
 class ThreadsController extends Controller
 {
-    private $n = 20;
-    private $queens = [];
 
     public function __construct()
     {
@@ -24,27 +22,9 @@ class ThreadsController extends Controller
     public function index(Channel $channel, ThreadFilters $filters, Trending $trending)
     {
 
-        $a = [0,1,3,0,5,2,0,1,0,0,0,2,0];
-
-
-        $cur = 0;
-
-        while($cur < sizeof($a)){
-
-            if($a[$cur] == 0){
-                array_push($a, 0);
-                unset($a[$cur]);
-            }
-
-            $cur++;
-        }
-
-        foreach ($a as $value){
-            echo $value.' ';
-        }
-        die;
-
         $threads = Thread::latest()->filter($filters);
+
+
 
         if ($channel->exists) {
             $threads->where('channel_id', $channel->id);
