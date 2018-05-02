@@ -1,12 +1,12 @@
 <template>
     <div class="card" :id="'reply-'+id" :class="isBest ? 'bg-success': 'bg-default'">
         <div class="card-header">
-            <a :href="'/profiles/'+data.user.name" v-text="data.user.name"></a>
+            <a :href="'/profiles/'+reply.user.name" v-text="reply.user.name"></a>
             said: <span v-text="ago"></span>
 
             <!--@if(Auth::check())-->
             <div v-if="signedIn">
-                <favorite :reply="data"></favorite>
+                <favorite :reply="reply"></favorite>
             </div>
             <!--@endif-->
 
@@ -26,8 +26,8 @@
 
             <div v-else v-html="body"></div>
         </div>
-        <div class="card-footer">
-            <div v-if="authorize('updateReply', reply)">
+        <div class="card-footer" v-if="authorize('owns', reply) || authorize('owns', reply.thread)">
+            <div v-if="authorize('owns', reply)">
                 <button class="btn btn-xs" @click="editing = true">Edit</button>
 
                 <button class="btn btn-warning btn-xs" @click="destroy">
@@ -35,7 +35,7 @@
                 </button>
             </div>
 
-            <button class="btn-default btn-xs" @click="markBestReply" v-show="!isBest">
+            <button class="btn-default btn-xs" @click="markBestReply" v-if="authorize('owns', reply.thread)">
                 Best reply
             </button>
             <!--@endcan-->
@@ -50,20 +50,19 @@
     import moment from 'moment';
 
     export default {
-        props: ['data'],
+        props: ['reply'],
         components: {Favorite},
         data() {
             return {
-                id: this.data.id,
+                id: this.reply.id,
                 editing: false,
-                body: this.data.body,
-                isBest: this.data.isBest,
-                reply: this.data
+                body: this.reply.body,
+                isBest: this.reply.isBest,
             }
         },
         computed: {
             ago() {
-                return moment(this.data.created_at).fromNow();
+                return moment(this.reply.created_at).fromNow();
             }
         },
         created() {
