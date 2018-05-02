@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <thread-view :initial-replies-count="{{ $thread->replies_count }}" inline-template>
+    <thread-view :thread="{{ $thread }}" inline-template>
         <div class="container">
             <div class="row">
                 <div class="col-md-8">
@@ -52,8 +52,11 @@
                             @endcan
 
 
-                            <subscribe-button
-                                    :active="{{ $thread->isSubscribedTo? 'true': 'false' }}"></subscribe-button>
+                            <subscribe-button v-if="signedIn"
+                                    :active="{{ json_encode($thread->isSubscribedTo) }}"></subscribe-button>
+
+                            <button class="btn btn-warning" v-if="authorize('isAdmin')" @click="toggle" v-text="locked? 'Unlock': 'Lock'">
+                            </button>
                         </div>
                     </div>
                 </div>
