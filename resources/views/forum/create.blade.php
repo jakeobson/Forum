@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('header')
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+@endsection
+
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
@@ -10,7 +14,8 @@
                 <form method="POST" action="/threads">
                     {{ csrf_field() }}
                     <div class="form-group">
-                        <input type="text" name="title" placeholder="Thread Title" class="form-control" value="{{ old('title') }}" required />
+                        <input type="text" name="title" placeholder="Thread Title" class="form-control"
+                               value="{{ old('title') }}" required/>
                     </div>
                     <div class="form-group">
                         <select name="channel_id" class="form-control" required>
@@ -22,6 +27,9 @@
                     </div>
                     <div class="form-group">
                         <textarea name="body" class="form-control" required>{{ old('body') }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="g-recaptcha" data-sitekey="6Lf-5FYUAAAAAH-IxDQLRz0_9XbhU2YoABI56DLS"></div>
                     </div>
                     <button type="submit" class="btn btn-default">Create new thread</button>
                 </form>

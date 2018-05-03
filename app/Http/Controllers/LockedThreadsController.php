@@ -9,11 +9,14 @@ class LockedThreadsController extends Controller
 {
     public function store(Thread $thread)
     {
-        $this->update(['locked' => true]);
+        $thread->update(['locked' => true]);
+
+        return response([], 200);
     }
 
     public function destroy(Thread $thread)
     {
-        $this->update(['locked' => false]);
+        $thread->update(['locked' => false]);
+        return response([], 200);
     }
 }

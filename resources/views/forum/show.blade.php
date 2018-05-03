@@ -10,19 +10,10 @@
             <div class="row">
                 <div class="col-md-8">
 
-                    <div class="card">
-                        <div class="card-header">
-
-                            {{ $thread->title.' by '.$thread->user->name }}
-
-                            <img src="{{ $thread->user->avatar }}" width="30" height="30"/>
-
-                        </div>
-
-                        <div class="card-body">
-                            {{ $thread->body }}
-                        </div>
+                    <div v-cloak>
+                        @include ('forum._thread_content')
                     </div>
+
 
                     <hr/>
 
@@ -53,9 +44,10 @@
 
 
                             <subscribe-button v-if="signedIn"
-                                    :active="{{ json_encode($thread->isSubscribedTo) }}"></subscribe-button>
+                                              :active="{{ json_encode($thread->isSubscribedTo) }}"></subscribe-button>
 
-                            <button class="btn btn-warning" v-if="authorize('isAdmin')" @click="toggle" v-text="locked? 'Unlock': 'Lock'">
+                            <button class="btn btn-warning" v-if="authorize('isAdmin')" @click="toggle"
+                                    v-text="locked? 'Unlock': 'Lock'">
                             </button>
                         </div>
                     </div>

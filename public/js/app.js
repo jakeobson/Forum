@@ -64170,7 +64170,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             repliesCount: this.thread.replies_count,
-            locked: this.thread.locked
+            locked: this.thread.locked,
+            editing: false,
+            form: {
+                title: this.thread.title,
+                body: this.thread.body
+            }
         };
     },
 
@@ -64179,6 +64184,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios[this.locked ? 'delete' : 'post']('/locked-threads/' + this.thread.slug);
 
             this.locked = !this.locked;
+        },
+        cancel: function cancel() {
+            this.form = {
+                title: this.thread.title,
+                body: this.thread.body
+            };
+
+            this.editing = false;
+        },
+        update: function update() {
+            var _this = this;
+
+            axios.patch('/threads/' + this.thread.channel.slug + '/' + this.thread.slug, this.form).then(function () {
+                flash('You have edited a thread');
+                _this.editing = false;
+            });
         }
     }
 
@@ -64439,15 +64460,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         update: function update() {
+            var _this2 = this;
+
             axios.patch('/replies/' + this.id, {
                 body: this.body
+            }).then(function () {
+                flash('Updated a reply');
+                _this2.editing = false;
             }).catch(function (error) {
                 flash(error.response.data, 'danger');
             });
-
-            this.editing = false;
-
-            flash('Updated a reply');
         },
         destroy: function destroy() {
             axios.delete('/replies/' + this.id);

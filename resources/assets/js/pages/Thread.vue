@@ -9,7 +9,12 @@
         data() {
             return {
                 repliesCount: this.thread.replies_count,
-                locked: this.thread.locked
+                locked: this.thread.locked,
+                editing: false,
+                form: {
+                    title: this.thread.title,
+                    body: this.thread.body
+                }
             }
         },
         methods: {
@@ -18,6 +23,20 @@
 
                 this.locked = !this.locked;
 
+            },
+            cancel() {
+                this.form = {
+                    title: this.thread.title,
+                    body: this.thread.body
+                };
+
+                this.editing = false;
+            },
+            update() {
+                axios.patch('/threads/' + this.thread.channel.slug + '/' + this.thread.slug, this.form).then(() => {
+                    flash('You have edited a thread');
+                    this.editing = false;
+                });
             }
         }
 

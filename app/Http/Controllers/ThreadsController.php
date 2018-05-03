@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\Recaptcha;
 use App\Rules\SpamFree;
 use App\Thread;
 use App\Channel;
 use App\Filters\ThreadFilters;
 use App\Trending;
 use Illuminate\Http\Request;
-
 
 class ThreadsController extends Controller
 {
@@ -60,11 +60,11 @@ class ThreadsController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'title' => ['required', new SpamFree],
             'channel_id' => 'required',
-            'body' => ['required', new SpamFree]
+            'body' => ['required', new SpamFree],
+            'g-recaptcha-response' => ['required', new Recaptcha]
         ]);
 
         $thread = Thread::create([
@@ -76,6 +76,18 @@ class ThreadsController extends Controller
 
         return redirect($thread->path())
             ->with('flash', 'Your thread has been published');
+    }
+
+    public function update($channel, Thread $thread)
+    {
+        $this->authorize('update', $thread);
+
+        $data = request()->validate([
+            'title' => ['required', new SpamFree],
+            'body' => ['required', new SpamFree],
+        ]);
+
+        $thread->update($data);
     }
 
     public function destroy($channel, Thread $thread)
