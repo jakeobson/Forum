@@ -20,7 +20,6 @@ class ThreadsController extends Controller
 
     public function index(Channel $channel, ThreadFilters $filters, Trending $trending)
     {
-
         $threads = Thread::latest()->filter($filters);
 
         if ($channel->exists) {

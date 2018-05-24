@@ -2,13 +2,48 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Events\ThreadHasNewReply;
+use ScoutElastic\Searchable;
+use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
 {
 
-    use RecordsActivity;
+    use RecordsActivity, Searchable;
+
+    //Search configuration
+    protected $indexConfigurator = ThreadsIndexConfigurator::class;
+
+    protected $searchRules = [
+        //
+    ];
+
+    protected $mapping = [
+        'properties' => [
+            'text' => [
+                'type' => 'text',
+                'fields' => [
+                    'raw' => [
+                        'type' => 'text',
+                        'index' => true,
+                    ]
+                ]
+            ],
+            'total_fields' => [
+                'limit' => 100
+            ]
+        ]
+    ];
+
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'body' => $this->body
+        ];
+    }
+
+    // end of search configuration
 
     protected $guarded = [];
 
